@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVERYTHING EVERYWHERE ALL AT ONCE (Video Background)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display.swap" rel="stylesheet">
+  
+<style>
+/* -------------------- CSS 코드 시작 -------------------- */
+@font-face {
+    font-family: 'JoseonGulim';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/ChosunGu.woff') format('woff');
+    font-weight: normal;
+    font-display: swap;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+    width:100%; height:100%; overflow:hidden; 
+    background: #ffffff;
+    font-family: 'JoseonGulim', 'Noto Sans KR', sans-serif;
+    cursor: none;
+    position: relative;
+}
+
+#background-container { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    z-index: 1; 
+}
+
+/* 웹캠용 비디오 (이제 사용 안 함) */
+#webcamVideo { 
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    object-fit: cover; display: none; z-index: 1; opacity: 0;
+    transform: scaleX(-1); 
+    transition: opacity 2s ease-in-out; /* 서서히 나타나는 효과 */
+} 
+
+/* 배경 동영상용 비디오 요소 */
+#backgroundVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    display: none;     /* 평소엔 숨겨 둠 */
+    z-index: 1;        /* 파티클 캔버스(2)보다 뒤 */
+    opacity: 0;        /* 부드러운 전환 위해 */
+    transition: opacity 0.5s ease-in-out;
+    /* 필터는 JS에서 적용 */
+}
+
+
+/* 웹캠 오버레이 (이제 사용 안 함) */
+.webcam-overlay { display: none; }
+
+/* 파티클 캔버스 */
+#canvas { 
+    display:block; 
+    position:absolute; 
+    top:0; 
+    left:0; 
+    background: transparent; 
+    z-index: 2; /* 파티클 캔버스 */
+}
+
+.cursor-image {
+    position: fixed;
+    width: 120px;
+    height: 120px;
+    border-radius: 0;
+    border: none;
+    background: transparent;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: none;
+    background-image: url('1.png'); /* 1.png 파일 필요 */
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.final-text { position:absolute; top:50%; left:50%; color:#0033ff; font-size:4rem; text-align:center; opacity:0; text-shadow: 0 0 15px #0033ff, 0 0 25px #0033ff, 0 0 35px rgba(0,51,255,0.3); transform: translate(-50%, -50%) scale(1); animation: breathe 5s ease-in-out infinite 5s, glow 3s ease-in-out infinite alternate; transition: opacity 6s ease-in; font-weight: normal; z-index: 20; line-height: 1.2; }
+@keyframes breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); text-shadow: 0 0 15px #0033ff; }
+  50% { transform: translate(-50%, -50%) scale(1.03); text-shadow: 0 0 25px #0033ff; }
+}
+@keyframes glow {
+  0% { text-shadow: 0 0 15px #0033ff, 0 0 25px #0033ff, 0 0 35px rgba(0,51,255,0.3); }
+  100% { text-shadow: 0 0 20px #0033ff, 0 0 30px #0033ff, 0 0 40px rgba(0,51,255,0.5), 0 0 50px rgba(0,51,255,0.2); }
+}
+
+/* 커서 애니메이션 키프레임 */
+@keyframes rotate {
+  0% { transform: scale(1.4) rotate(0deg); }
+  100% { transform: scale(1.4) rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1.4); }
+  50% { transform: scale(1.6); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: scale(1.5) translateX(0); }
+  25% { transform: scale(1.5) translateX(-2px); }
+  75% { transform: scale(1.5) translateX(2px); }
+}
+
+@keyframes float {
+  0%, 100% { transform: scale(1.2) translateY(0); }
+  50% { transform: scale(1.2) translateY(-3px); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1.4) translateY(0); }
+  50% { transform: scale(1.4) translateY(-5px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: scale(1.5) rotate(0deg); }
+  25% { transform: scale(1.5) rotate(-3deg); }
+  75% { transform: scale(1.5) rotate(3deg); }
+}
+
+@keyframes fade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.subtitle-container { 
+    position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); 
+    width: 85%; max-width: 900px; 
+    background: #ffffff; 
+    border-radius: 8px; 
+    border: 1.5px solid #0033ff;
+    box-shadow: none;
+    padding: 20px 30px; 
+    color: #0033ff; 
+    font-size: 1.5rem; 
+    text-align: center; 
+    opacity: 0; 
+    transition: all 0.8s ease-in-out; 
+    pointer-events: none; 
+    z-index: 15; 
+    font-weight: 600;
+    line-height: 1.4;
+    text-shadow: none;
+}
+.cosmic-ui {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+.dimension-indicator {
+    position: absolute;
+    top: 20px; left: 20px;
+    background: #ffffff;
+    border: 1.5px solid #0033ff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: none;
+}
+/* 상단 제목 스타일 */
+.main-title {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 100;
+    color: #0033ff;
+}
+
+    .main-title h1 {
+        font-family: 'Anton', sans-serif;
+        font-size: 5.2rem;
+        font-weight: 400;
+        letter-spacing: 4px;
+        line-height: 1;
+        margin-bottom: 10px;
+        color: #0033ff;
+        text-transform: uppercase;
+    }
+
+.main-title p {
+    font-size: 1.3rem;
+    font-weight: 300;
+    letter-spacing: 3px;
+    opacity: 0.8;
+    color: #0033ff;
+}
+
+/* 하단 UI 스타일 */
+.bottom-ui {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 20px;
+}
+
+/* 촬영 버튼 스타일 */
+.camera-button {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+}
+
+#captureBtn {
+    background: linear-gradient(135deg, #0033ff, #0066ff);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 51, 255, 0.4);
+    transition: all 0.3s ease;
+    animation: pulse 2s ease-in-out infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#captureBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(0, 51, 255, 0.6);
+}
+
+#captureBtn:active {
+    transform: scale(0.95);
+}
+
+/* 왼쪽 하단: 단계 설명 */
+.stage-description {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1.5px solid #0033ff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.stage-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0033ff;
+    letter-spacing: 1px;
+}
+
+/* 오른쪽 하단: 진행도 바 */
+.progress-container {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1.5px solid #0033ff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.progress-bar {
+    width: 150px;
+    height: 20px;
+    background: rgba(0, 51, 255, 0.2);
+    border: 1.5px solid #0033ff;
+    border-radius: 0;
+    overflow: hidden;
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+}
+
+.progress-segment {
+    flex: 1;
+    height: 100%;
+    background: rgba(0, 51, 255, 0.2);
+    border: 1px solid rgba(0, 51, 255, 0.3);
+    transition: background 0.3s ease;
+}
+
+.progress-segment.filled {
+    background: #0033ff;
+    border-color: #0033ff;
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0033ff;
+    white-space: nowrap;
+}
+
+.subtitle-container.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+/* -------------------- CSS 코드 끝 -------------------- */
+</style>
+</head>
+<body>
+
+<div id="background-container">
+    <video id="webcamVideo" autoplay playsinline muted loop></video> 
+    <video id="backgroundVideo" muted loop playsinline></video> 
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="final-text" id="finalText">You are everything, everywhere, all at once.</div>
+<div class="cursor-image" id="cursorImage"></div>
+<div class="subtitle-container" id="subtitleContainer">
+    <p id="subtitleText"></p>
+</div>
+
+<div class="main-title">
+    <h1>EVERYTHING EVERYWHERE ALL AT ONCE</h1>
+    <p>An Interactive Multiverse Experience</p>
+</div>
+
+<div class="bottom-ui">
+    <div class="stage-description" id="stageDescription">
+        <span class="stage-text">CHOOSING DIMENSION</span>
+    </div>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-segment" id="segment1"></div>
+            <div class="progress-segment" id="segment2"></div>
+            <div class="progress-segment" id="segment3"></div>
+        </div>
+        <div class="progress-text" id="progressText">0/3</div>
+    </div>
+</div>
+
+<!-- 촬영 버튼 (섹션 6에서만 표시) -->
+<div class="camera-button" id="cameraButton" style="display: none;">
+    <button id="captureBtn">📸</button>
+</div>
+<script>
+// -------------------- 설정 --------------------
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const cursorImage = document.getElementById('cursorImage');
+const webcamVideo = document.getElementById('webcamVideo'); // 웹캠 비디오 (이제 사용 안 함)
+const backgroundVideo = document.getElementById('backgroundVideo'); // 배경 동영상 요소
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+const width = canvas.width;
+const height = canvas.height;
+const centerX = width / 2;
+const centerY = height / 2;
+
+let mouse = {x: centerX, y: centerY, down:false, hoverTarget: null};
+window.addEventListener('mousemove', e => { 
+    mouse.x = e.clientX; 
+    mouse.y = e.clientY; 
+    cursorImage.style.left = (e.clientX - 60) + 'px';
+    cursorImage.style.top = (e.clientY - 60) + 'px';
+    cursorImage.style.opacity = '1';
+    cursorImage.style.backgroundImage = "url('1.png')";
+    // borderRadius는 차원 체험 중에는 변경하지 않음
+});
+window.addEventListener('mousedown', (e)=>{
+    mouse.down = true;
+    if (section === 0 && mouse.hoverTarget) {
+        mouse.hoverTarget.isSelected = true;
+        particles.forEach(p => { if (!p.isSelected) p.shatter(); });
+        advanceSection();
+    } else if (section === 3) {
+        // 텍스트 파티클 클릭 확인
+        if (mouse.hoverTarget && mouse.hoverTarget.text) {
+            // startExperience 함수 호출
+            startExperience(mouse.hoverTarget.text);
+            mouse.hoverTarget = null;
+        } else {
+             playGlitchSound(); // 배경 클릭 시 글리치 사운드
+        }
+    } else if (section === 4 && isAwaitingFinalClick) {
+        initiateFinalCollapse();
+    }
+});
+window.addEventListener('mouseup', ()=>{
+    mouse.down = false;
+    if (section === 3) {
+        glitchEffect.type = 'none';
+    }
+    stopGlitchSound();
+});
+window.addEventListener('mouseleave', () => { cursorImage.style.opacity = '0'; });
+window.addEventListener('mouseenter', () => { cursorImage.style.opacity = '1'; });
+
+let section = 0; // 0:선택, 1:다이빙, 2:파편화, 3:혼돈, 4:수렴, 5:클라이맥스, 6:피날레
+const sectionDurations = { 1: 4000, 2: 2500, 3: 25000 };
+let particles = [], embers = [], shockwaves = [], glowParticles = [];
+let flashRadius = 0, flashAlpha = 1, screenShake = {x:0, y:0, intensity:0};
+let selectedBaseColor = null;
+let glitchEffect = { type: 'none', duration: 0 };
+let isAwaitingFinalClick = false;
+let convergenceStartTime = 0;
+let isCollapsing = false; // 붕괴 애니메이션 플래그
+let experienceCount = 0; // 체험 횟수 추적
+let sectionStartTime = 0; // 섹션 시작 시간 추적
+
+const segment1 = document.getElementById('segment1');
+const segment2 = document.getElementById('segment2');
+const segment3 = document.getElementById('segment3');
+const progressText = document.getElementById('progressText');
+const stageText = document.querySelector('.stage-text');
+const cameraButton = document.getElementById('cameraButton');
+const captureBtn = document.getElementById('captureBtn');
+
+// 웹캠 관련 변수
+let webcamStream = null;
+let webcamPermissionGranted = false;
+
+// 촬영 기능 - 화면 전체 스크린샷
+function capturePhoto() {
+    if (!webcamStream) {
+        alert('웹캠이 활성화되지 않았습니다.');
+        return;
+    }
+    
+    // 화면 전체 크기로 캔버스 생성
+    const captureCanvas = document.createElement('canvas');
+    const captureCtx = captureCanvas.getContext('2d');
+    
+    // 화면 전체 크기 설정
+    captureCanvas.width = window.innerWidth;
+    captureCanvas.height = window.innerHeight;
+    
+    // 배경을 검은색으로 채우기
+    captureCtx.fillStyle = '#000000';
+    captureCtx.fillRect(0, 0, captureCanvas.width, captureCanvas.height);
+    
+    // 웹캠 비디오를 화면 전체에 맞춰 그리기
+    captureCtx.drawImage(webcamVideo, 0, 0, captureCanvas.width, captureCanvas.height);
+    
+    // 밝기와 블러 효과를 위한 캔버스 필터 적용
+    captureCtx.filter = 'brightness(1.3) blur(2px)';
+    captureCtx.drawImage(webcamVideo, 0, 0, captureCanvas.width, captureCanvas.height);
+    
+    // 필터 리셋
+    captureCtx.filter = 'none';
+    
+    // 흑백 필터 적용
+    const imageData = captureCtx.getImageData(0, 0, captureCanvas.width, captureCanvas.height);
+    const data = imageData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+        // RGB 값을 그레이스케일로 변환
+        const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+        data[i] = gray;     // Red
+        data[i + 1] = gray; // Green
+        data[i + 2] = gray; // Blue
+        // Alpha는 그대로 유지
+    }
+    
+    captureCtx.putImageData(imageData, 0, 0);
+    
+    // 최종 텍스트 그리기 (화면 중앙에) - 조선굴림체 적용
+    const finalText = document.getElementById('finalText');
+    if (finalText && finalText.style.opacity === '1') {
+        captureCtx.save();
+        captureCtx.font = '4rem JoseonGulim, serif';
+        captureCtx.fillStyle = '#0033ff';
+        captureCtx.textAlign = 'center';
+        captureCtx.textBaseline = 'middle';
+        captureCtx.shadowColor = '#0033ff';
+        captureCtx.shadowBlur = 15;
+        
+        const textX = captureCanvas.width / 2;
+        const textY = captureCanvas.height / 2;
+        captureCtx.fillText('You are everything, everywhere, all at once.', textX, textY);
+        captureCtx.restore();
+    }
+    
+    // 촬영 버튼 숨기기 (촬영 시에는 버튼이 보이지 않도록)
+    const originalDisplay = cameraButton.style.display;
+    cameraButton.style.display = 'none';
+    
+    // 잠시 후 다시 표시
+    setTimeout(() => {
+        cameraButton.style.display = originalDisplay;
+    }, 100);
+    
+    // 캔버스를 이미지로 변환하여 다운로드
+    captureCanvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `multiverse-screenshot-${new Date().getTime()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // 촬영 완료 메시지
+        showSubtitle('📸 화면 전체가 저장되었습니다!');
+        setTimeout(() => {
+            showSubtitle('당신은 모든 차원을 경험했습니다.');
+        }, 3000);
+    }, 'image/png');
+}
+
+// 촬영 버튼 이벤트 리스너
+captureBtn.addEventListener('click', capturePhoto);
+
+const memoryQuotes = [ 
+    "수많은 선택지 중 최악의 결과만 모인 우주가 바로 여기야.", "친절은, 우리가 혼란 속에서 길을 잃었을 때 사용하는 전략적이고 강력한 무기다.", "모든 새로운 발견은 그저 누군가의 기억일 뿐이야.", "아무것도 중요하지 않다면, 우리가 함께 겪는 모든 고통과 기쁨도 중요하지 않은 거겠지.", "당신은 모든 우주에서 가장 강력한 존재야.", "사랑은 우리가 선택하는 것이다. 아무리 작은 것이라도.", "우리는 모두 연결되어 있어. 모든 차원에서.", "가장 어두운 순간에도 빛이 있어. 당신 안에.", "무한한 가능성 속에서도 당신은 유일무이해.", "모든 것이 동시에 일어나고 있어. 지금 이 순간에도.", "당신은 이미 완벽해. 모든 버전의 당신이.", "가장 작은 행동이 가장 큰 변화를 만들어내.", "우리는 모두 같은 존재야. 다른 차원에서만.", "사랑은 모든 차원을 통과하는 유일한 힘이야.", "당신의 선택이 모든 우주를 구원할 수 있어.", "무한한 가능성 속에서도 당신은 특별해.", "모든 것이 연결되어 있다는 것을 기억해.", "가장 어려운 순간이 가장 중요한 순간이야.", "당신은 이미 모든 것을 알고 있어.", "사랑이 모든 답이야. 모든 차원에서."
+];
+
+// 베이글 대사 스타일의 최종 메시지들
+const finalBagelQuotes = [
+    "모든 것이 동시에 일어나고 있어. 지금 이 순간에도.",
+    "당신은 이미 완벽해. 모든 버전의 당신이.",
+    "무한한 가능성 속에서도 당신은 특별해.",
+    "모든 가능성보다 중요한 것은 '지금, 여기'의 당신입니다."
+];
+
+
+const colorPalette = [ 
+    // 네온 컬러
+    {r: 255, g: 0, b: 150}, {r: 0, g: 255, b: 255}, {r: 255, g: 255, b: 0}, {r: 255, g: 0, b: 255}, 
+    {r: 0, g: 255, b: 0}, {r: 255, g: 100, b: 0}, {r: 150, g: 0, b: 255}, {r: 255, g: 255, b: 255}, 
+    {r: 0, g: 200, b: 255}, {r: 255, g: 200, b: 0},
+    
+    // 파스텔 컬러
+    {r: 255, g: 182, b: 193}, {r: 173, g: 216, b: 230}, {r: 255, g: 218, b: 185}, {r: 221, g: 160, b: 221},
+    {r: 255, g: 228, b: 196}, {r: 240, g: 248, b: 255}, {r: 255, g: 239, b: 213}, {r: 230, g: 230, b: 250},
+    
+    // 어두운 컬러
+    {r: 139, g: 69, b: 19}, {r: 75, g: 0, b: 130}, {r: 0, g: 100, b: 0}, {r: 128, g: 0, b: 128},
+    {r: 25, g: 25, b: 112}, {r: 47, g: 79, b: 79}, {r: 105, g: 105, b: 105}, {r: 169, g: 169, b: 169},
+    
+    // 따뜻한 컬러
+    {r: 255, g: 69, b: 0}, {r: 255, g: 140, b: 0}, {r: 255, g: 215, b: 0}, {r: 255, g: 20, b: 147},
+    {r: 255, g: 105, b: 180}, {r: 255, g: 192, b: 203}, {r: 255, g: 160, b: 122}, {r: 255, g: 127, b: 80},
+    
+    // 차가운 컬러
+    {r: 0, g: 191, b: 255}, {r: 30, g: 144, b: 255}, {r: 0, g: 206, b: 209}, {r: 72, g: 209, b: 204},
+    {r: 0, g: 250, b: 154}, {r: 50, g: 205, b: 50}, {r: 124, g: 252, b: 0}, {r: 173, g: 255, b: 47},
+    
+    // 메탈릭 컬러
+    {r: 192, g: 192, b: 192}, {r: 255, g: 215, b: 0}, {r: 184, g: 134, b: 11}, {r: 218, g: 165, b: 32},
+    {r: 205, g: 127, b: 50}, {r: 160, g: 82, b: 45}, {r: 139, g: 69, b: 19}, {r: 101, g: 67, b: 33},
+    
+    // 특수 컬러
+    {r: 255, g: 0, b: 0}, {r: 0, g: 0, b: 255}, {r: 0, g: 128, b: 0}, {r: 128, g: 0, b: 128},
+    {r: 255, g: 165, b: 0}, {r: 0, g: 255, b: 127}, {r: 255, g: 0, b: 255}, {r: 0, g: 255, b: 255}
+];
+function getRandomColor() { const color = colorPalette[Math.floor(Math.random() * colorPalette.length)]; return `rgb(${color.r}, ${color.g}, ${color.b})`; }
+function getShadedColor(baseRgb, minBrightness = 0.3, maxBrightness = 1.0) { let [r, g, b] = baseRgb.match(/\d+/g).map(Number); let cmin = Math.min(r,g,b), cmax = Math.max(r,g,b), delta = cmax - cmin, h = 0, s = 0, l = 0; if (delta == 0) h = 0; else if (cmax == r) h = ((g - b) / delta) % 6; else if (cmax == g) h = (b - r) / delta + 2; else h = (r - g) / delta + 4; h = Math.round(h * 60); if (h < 0) h += 360; l = (cmax + cmin) / 2; s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l / 255 - 1)); l = (Math.random() * (maxBrightness - minBrightness) + minBrightness) * 100; s /= 100; l /= 100; let c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2, r2 = 0, g2 = 0, b2 = 0; if (0 <= h && h < 60) { r2 = c; g2 = x; b2 = 0; } else if (60 <= h && h < 120) { r2 = x; g2 = c; b2 = 0; } else if (120 <= h && h < 180) { r2 = 0; g2 = c; b2 = x; } else if (180 <= h && h < 240) { r2 = 0; g2 = x; b2 = c; } else if (240 <= h && h < 300) { r2 = x; g2 = 0; b2 = c; } else if (300 <= h && h < 360) { r2 = c; g2 = 0; b2 = x; } r = Math.round((r2 + m) * 255); g = Math.round((g2 + m) * 255); b = Math.round((b2 + m) * 255); return `rgb(${r}, ${g}, ${b})`; }
+
+// -------------------- 클래스 --------------------
+class Particle {
+    constructor(x, y, r, color, text = ""){
+        this.x = x; 
+        this.y = y; 
+        this.r = r; 
+        this.color = color; 
+        this.dx = (Math.random()-0.5)*1.2; // 속도 조정 (2.5 -> 1.2)
+        this.dy = (Math.random()-0.5)*1.2; // 속도 조정 (2.5 -> 1.2)
+        this.text = text; 
+        this.fontSize = 28; // 텍스트 크기 증가 (24 -> 28) 
+        this.alpha = 1; 
+        this.isChoiceParticle = false; 
+        this.isSelected = false; 
+        this.isShattered = false;
+        // 추가적인 움직임을 위한 변수들
+        this.baseDx = this.dx;
+        this.baseDy = this.dy;
+        this.waveOffset = Math.random() * Math.PI * 2;
+        this.baseHue = Math.random() * 360; // 각 파티클마다 고유한 색상
+    }
+    shatter() { this.isShattered = true; this.dx = (Math.random() - 0.5) * 15; this.dy = (Math.random() - 0.5) * 15; if (Math.random() < 0.3) playFallingSound(); }
+    update(){
+        // 파티클에 더 역동적인 움직임 추가 (강도 조정)
+        const time = Date.now() * 0.001;
+        const waveX = Math.sin(time * 0.3 + this.waveOffset) * 0.15; // 강도 감소 (0.5 -> 0.3, 0.3 -> 0.15)
+        const waveY = Math.cos(time * 0.2 + this.waveOffset) * 0.15; // 강도 감소 (0.3 -> 0.2, 0.3 -> 0.15)
+        
+        if (section === 0 && this.isShattered) { 
+            this.x += this.dx; this.y += this.dy; this.alpha -= 0.02; this.dx *= 0.98; this.dy *= 0.98; 
+        } else if (section === 1) { 
+            if (this.isSelected) { 
+                this.dx += (centerX - this.x) * 0.01; this.dy += (centerY - this.y) * 0.01; this.r += 25; 
+                if(Math.random() < 0.2) shockwaves.push(new Shockwave(this.x, this.y, this.r, this.color)); 
+            } else { 
+                this.alpha -= 0.05; 
+            } 
+        } else if (section === 3) {
+            // 섹션 3: 파도 효과만 적용, 속도 증가 제거
+            this.dx += waveX * 0.05; // 파도 효과 감소 (0.1 -> 0.05)
+            this.dy += waveY * 0.05; // 파도 효과 감소 (0.1 -> 0.05)
+            this.x += this.dx; // 속도 증가 제거
+            this.y += this.dy; // 속도 증가 제거 
+            if(glitchEffect.type === 'gravity') { this.dy += 0.1; } 
+            if((this.x < this.r && this.dx < 0) || (this.x > width - this.r && this.dx > 0)) this.dx *= -0.8; 
+            if((this.y < this.r && this.dy < 0) || (this.y > height - this.r && this.dy > 0)) this.dy *= -0.8; 
+        } else { 
+            // 기본 움직임에 파도 효과 추가 (강도 감소)
+            this.dx += waveX * 0.02; // 파도 효과 감소 (0.05 -> 0.02)
+            this.dy += waveY * 0.02; // 파도 효과 감소 (0.05 -> 0.02)
+            this.x += this.dx; this.y += this.dy;
+            if(glitchEffect.type === 'gravity') { this.dy += 0.1; }
+            if((this.x < this.r && this.dx < 0) || (this.x > width - this.r && this.dx > 0)) this.dx *= -0.8; 
+            if((this.y < this.r && this.dy < 0) || (this.y > height - this.r && this.dy > 0)) this.dy *= -0.8; 
+        }
+        if(section === 4){
+            const vecX = centerX - this.x; const vecY = centerY - this.y; const dist = Math.sqrt(vecX*vecX + vecY*vecY);
+            const pullForce = 0.001 * (1 - dist / width); this.dx += vecX * pullForce; this.dy += vecY * pullForce;
+            const orbitSpeed = 0.05; this.dx += -vecY * orbitSpeed / Math.max(dist, 1); this.dy += vecX * orbitSpeed / Math.max(dist, 1); 
+            this.dx *= 0.99; this.dy *= 0.99; if (dist < 20) this.r -= 0.2; 
+        } 
+    }
+     draw(ctx){ 
+         if(this.r <= 0.1 || this.alpha <= 0) return; 
+         ctx.save(); 
+         ctx.globalAlpha = this.alpha; 
+         
+         // 텍스트 파티클과 조각난 현실 파티클을 구분하여 렌더링
+        if (this.text) {
+            // 텍스트 파티클: 원형 렌더링 제거, 텍스트만 표시
+            // 원형 렌더링 코드 완전 제거됨
+        } else {
+             // 조각난 현실 파티클: 섹션 2와 동일한 스타일
+             const glowIntensity = this.isChoiceParticle && this === mouse.hoverTarget ? 30 : section === 1 && this.isSelected ? 20 : 10;
+             ctx.shadowColor = this.color;
+             ctx.shadowBlur = glowIntensity;
+             ctx.fillStyle = this.color;
+             ctx.beginPath();
+             ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+             ctx.fill();
+             
+             if (this.isChoiceParticle && this === mouse.hoverTarget) {
+                 ctx.shadowBlur = glowIntensity * 1.2;
+                 ctx.globalAlpha = this.alpha * 0.2;
+                 ctx.beginPath();
+                 ctx.arc(this.x, this.y, this.r * 1.3, 0, Math.PI*2);
+                 ctx.fill();
+             }
+         }
+         
+         ctx.restore(); 
+         
+         // 텍스트 렌더링 (텍스트 파티클만)
+         if(this.text && !this.isChoiceParticle){ 
+             ctx.save(); 
+             ctx.fillStyle = `rgba(255,255,255,${0.9 * this.alpha})`; 
+            ctx.font = `${this.fontSize}px 'JoseonGulim'`; 
+            ctx.textAlign = 'center'; 
+            ctx.textBaseline = 'middle'; 
+            
+            // 각 파티클마다 고유한 알록달록한 색상
+            const time = Date.now() * 0.003;
+            const hue = (this.baseHue + time * 20) % 360; // 각 파티클의 고유 색상에 시간 변화 추가
+            const textColor = `hsl(${hue}, 90%, 60%)`; // 텍스트 자체를 무지개색으로
+            const glowColor = `hsl(${hue}, 80%, 70%)`; // 글로우도 같은 색상
+            
+            ctx.shadowColor = glowColor; 
+            ctx.shadowBlur = 15 + Math.sin(time + this.x * 0.01) * 5; // 동적인 글로우
+            ctx.fillStyle = textColor; // 알록달록한 텍스트 색상
+            ctx.fillText(this.text, this.x, this.y);
+             ctx.restore(); 
+         } 
+     }
+}
+class Shockwave { 
+    constructor(x, y, r, color) { this.x = x; this.y = y; this.r = r; this.color = color; this.life = 1; } 
+    update() { this.r += 8; this.life -= 0.02; } 
+    draw(ctx) { if (this.life <= 0) return; ctx.save(); ctx.strokeStyle = this.color; ctx.globalAlpha = this.life; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.stroke(); ctx.restore(); } 
+}
+class Ember { 
+    constructor(){ const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 1.5; this.x = centerX; this.y = centerY; this.dx = Math.cos(angle) * speed; this.dy = Math.sin(angle) * speed; this.r = Math.random() * 2.5; this.life = 1; this.color = getRandomColor(); this.glowIntensity = Math.random() * 15 + 5; } 
+    update(){ this.x += this.dx; this.y += this.dy; this.life -= 0.003; this.glowIntensity += Math.sin(Date.now() * 0.01) * 1; } 
+    draw(ctx){ if(this.life <= 0) return; ctx.save(); ctx.shadowColor = this.color; ctx.shadowBlur = this.glowIntensity; ctx.fillStyle = `rgba(${parseInt(this.color.substring(4))}, ${parseInt(this.color.substring(this.color.indexOf(',')+1))}, ${parseInt(this.color.substring(this.color.lastIndexOf(',')+1))}, ${this.life})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fill(); ctx.restore(); } 
+}
+class GlowParticle { 
+    constructor(x, y) { 
+        this.x = x; 
+        this.y = y; 
+        this.r = Math.random() * 3 + 1; 
+        this.dx = (Math.random() - 0.5) * 1.5; // 속도 조정 (3 -> 1.5)
+        this.dy = (Math.random() - 0.5) * 1.5; // 속도 조정 (3 -> 1.5)
+        this.color = getRandomColor(); 
+        this.life = 1; 
+        this.pulse = 0;
+        this.waveOffset = Math.random() * Math.PI * 2;
+    } 
+    update() { 
+        // 파도 효과 추가
+        const time = Date.now() * 0.001;
+        const waveX = Math.sin(time * 0.4 + this.waveOffset) * 0.2;
+        const waveY = Math.cos(time * 0.6 + this.waveOffset) * 0.2;
+        
+        this.dx += waveX * 0.03; // 파도 효과 감소 (0.1 -> 0.03)
+        this.dy += waveY * 0.03; // 파도 효과 감소 (0.1 -> 0.03)
+        this.x += this.dx; 
+        this.y += this.dy; 
+        this.life -= 0.01; 
+        this.pulse += 0.1; 
+        this.dx *= 0.98; // 마찰 감소 (0.99 -> 0.98)
+        this.dy *= 0.98; // 마찰 감소 (0.99 -> 0.98)
+    } 
+    draw(ctx) { if (this.life <= 0) return; ctx.save(); const pulseSize = this.r + Math.sin(this.pulse) * 1; ctx.shadowColor = this.color; ctx.shadowBlur = 15 + Math.sin(this.pulse) * 5; ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, pulseSize, 0, Math.PI*2); ctx.fill(); ctx.restore(); } 
+}
+
+
+// -------------------- UI 및 자막 --------------------
+const phrases = [
+    "제빵사", "엄마", "쿵푸 마스터", "과학자", "길가의 돌멩이", "가수", "딸", "소세지 손가락", "아무것도 아닌"
+];
+
+const subtitleContainer = document.getElementById('subtitleContainer');
+const subtitleText = document.getElementById('subtitleText');
+let subtitleTimeout;
+function showSubtitle(message) { 
+    clearTimeout(subtitleTimeout); 
+    subtitleText.textContent = message; 
+    subtitleContainer.classList.add('show'); 
+    subtitleTimeout = setTimeout(() => { 
+        subtitleContainer.classList.remove('show'); 
+    }, 8000); 
+}
+
+function updateProgress() {
+    // 섹션별 진행도 계산 (0-6 섹션을 3칸으로 나눔)
+    const progress = Math.min(experienceCount, 3); // 최대 3개 체험
+    
+    // 각 칸의 채움 상태 업데이트
+    segment1.classList.toggle('filled', progress >= 1);
+    segment2.classList.toggle('filled', progress >= 2);
+    segment3.classList.toggle('filled', progress >= 3);
+    
+    // 텍스트 업데이트
+    progressText.textContent = `${progress}/3`;
+}
+
+function updateStage() {
+    const stageNames = [
+        'CHOOSING DIMENSION',
+        'DIVING INTO REALITY', 
+        'FRAGMENTING SPACE-TIME',
+        'CHAOS REIGNING',
+        'CONVERGING UNIVERSES',
+        'CLIMAX APPROACHING',
+        'UNITY ACHIEVED'
+    ];
+    stageText.textContent = stageNames[section] || 'MULTIVERSE ACTIVE';
+}
+const sectionMessages = { 0: "무한한 우주에서 당신의 정체성을 선택하세요. 모든 가능성이 여기에 있습니다.", 1: "선택한 차원으로의 여행이 시작됩니다...", 2: "당신의 선택이 만들어낸 현실. 모든 것이 조각나고 흩어집니다.", 3: "멀티버스에선 현실과 다른 차원의 삶이 공존합니다. 빛나는 텍스트를 클릭하세요.", 4: "모든 차원이 소용돌이칩니다. 잠시만 기다려주세요...", 5: "통합의 순간, 모든 경계가 사라지고 본질이 드러납니다.", 6: "당신은 모든 것이며, 어디에나 존재하며, 언제나 함께합니다. 온전한 당신." };
+
+// 웹캠 시작 함수
+async function startWebcam() {
+    if (webcamStream) return true; // 이미 스트림이 있으면 성공으로 간주
+    try {
+        console.log('웹캠 시작 시도...');
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: 'user'
+            } 
+        }); 
+        webcamStream = stream;
+        webcamVideo.srcObject = stream; 
+        await webcamVideo.play(); 
+        webcamPermissionGranted = true;
+        console.log('웹캠 성공적으로 시작됨');
+        return true;
+    } catch (err) { 
+        console.error('웹캠 시작 실패:', err);
+        webcamPermissionGranted = false;
+        return false;
+    } 
+}
+
+// 텍스트 클릭 시 동영상 배경 및 자막 표시 함수
+function startExperience(text) {
+    console.log(`동영상 체험 시작: ${text}`);
+
+    // 현재 체험 중인 차원을 왼쪽 바에 표시
+    stageText.textContent = `EXPERIENCING: ${text}`;
+
+    // 각 차원에 맞는 화려한 커서 효과 적용
+    const cursorEffects = {
+        "제빵사": {
+            background: "conic-gradient(from 0deg, #ff6b35, #f7931e, #ffd23f, #ff6b35)",
+            borderRadius: "50%",
+            boxShadow: "0 0 40px rgba(255, 107, 53, 1), 0 0 80px rgba(255, 107, 53, 0.8), 0 0 120px rgba(255, 107, 53, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.3)",
+            transform: "scale(1.4)",
+            animation: "rotate 2s linear infinite"
+        },
+        "엄마": {
+            background: "radial-gradient(circle, #ff69b4 0%, #ff1493 30%, #ffc0cb 70%, #ff69b4 100%)",
+            borderRadius: "50%",
+            boxShadow: "0 0 40px rgba(255, 105, 180, 1), 0 0 80px rgba(255, 105, 180, 0.8), 0 0 120px rgba(255, 105, 180, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.4)",
+            transform: "scale(1.4)",
+            animation: "pulse 1.5s ease-in-out infinite"
+        },
+        "쿵푸 마스터": {
+            background: "linear-gradient(45deg, #ff0000, #ff4500, #ffa500, #ff0000)",
+            borderRadius: "50%",
+            boxShadow: "0 0 50px rgba(255, 0, 0, 1), 0 0 100px rgba(255, 0, 0, 0.8), 0 0 150px rgba(255, 0, 0, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.2)",
+            transform: "scale(1.5)",
+            animation: "shake 0.5s ease-in-out infinite"
+        },
+        "과학자": {
+            background: "conic-gradient(from 180deg, #00bfff, #1e90ff, #87ceeb, #00bfff)",
+            borderRadius: "50%",
+            boxShadow: "0 0 40px rgba(0, 191, 255, 1), 0 0 80px rgba(0, 191, 255, 0.8), 0 0 120px rgba(0, 191, 255, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.3)",
+            transform: "scale(1.4)",
+            animation: "rotate 3s linear infinite"
+        },
+        "길가의 돌멩이": {
+            background: "radial-gradient(circle, #696969 0%, #808080 50%, #a9a9a9 100%)",
+            borderRadius: "50%",
+            boxShadow: "0 0 30px rgba(105, 105, 105, 1), 0 0 60px rgba(105, 105, 105, 0.8), 0 0 90px rgba(105, 105, 105, 0.6)",
+            transform: "scale(1.2)",
+            animation: "float 3s ease-in-out infinite"
+        },
+        "가수": {
+            background: "conic-gradient(from 90deg, #9370db, #8a2be2, #da70d6, #9370db)",
+            borderRadius: "50%",
+            boxShadow: "0 0 40px rgba(147, 112, 219, 1), 0 0 80px rgba(147, 112, 219, 0.8), 0 0 120px rgba(147, 112, 219, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.3)",
+            transform: "scale(1.4)",
+            animation: "rotate 2.5s linear infinite"
+        },
+        "딸": {
+            background: "radial-gradient(circle, #ffb6c1 0%, #ff69b4 30%, #ffc0cb 70%, #ffb6c1 100%)",
+            borderRadius: "50%",
+            boxShadow: "0 0 40px rgba(255, 182, 193, 1), 0 0 80px rgba(255, 182, 193, 0.8), 0 0 120px rgba(255, 182, 193, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.4)",
+            transform: "scale(1.4)",
+            animation: "bounce 1s ease-in-out infinite"
+        },
+        "소세지 손가락": {
+            background: "conic-gradient(from 45deg, #ff6347, #ff4500, #ffa500, #ff6347)",
+            borderRadius: "50%",
+            boxShadow: "0 0 50px rgba(255, 99, 71, 1), 0 0 100px rgba(255, 99, 71, 0.8), 0 0 150px rgba(255, 99, 71, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.2)",
+            transform: "scale(1.5)",
+            animation: "wiggle 0.8s ease-in-out infinite"
+        },
+        "아무것도 아닌": {
+            background: "radial-gradient(circle, #2f2f2f 0%, #1a1a1a 50%, #000000 100%)",
+            borderRadius: "50%",
+            boxShadow: "0 0 30px rgba(47, 47, 47, 1), 0 0 60px rgba(47, 47, 47, 0.8), 0 0 90px rgba(47, 47, 47, 0.6)",
+            transform: "scale(1.2)",
+            animation: "fade 2s ease-in-out infinite"
+        }
+    };
+
+    const effect = cursorEffects[text];
+    if (effect) {
+        cursorImage.style.background = effect.background;
+        cursorImage.style.borderRadius = effect.borderRadius;
+        cursorImage.style.boxShadow = effect.boxShadow;
+        cursorImage.style.transform = effect.transform;
+        cursorImage.style.animation = effect.animation;
+        cursorImage.style.backgroundImage = "none"; // 기본 이미지 제거
+    }
+
+    // 메인 파티클 캔버스를 숨김
+    canvas.style.display = 'none';
+    
+    // 텍스트에 따라 동영상 파일 경로 설정
+    // ⚠️ 파일 이름과 경로가 정확해야 합니다!
+    const videoMap = {
+        "제빵사": "baker.mp4",        // 예시: baker.mp4 파일 필요
+        "엄마": "mother.mp4",        // 예시: mother.mp4 파일 필요
+        "쿵푸 마스터": "kungfu.mp4",    // 예시: kungfu.mp4 파일 필요
+        "과학자": "scientist.mp4",   // ... 이하 동영상 파일 필요 ...
+        "길가의 돌멩이": "rock.mp4",
+        "가수": "singer.mp4",
+        "딸": "daughter.mp4",
+        "소세지 손가락": "sausage.mp4",
+        "아무것도 아닌": "nothing.mp4" // 예: 검은 화면 영상 또는 효과 영상
+    };
+    
+    // 각 차원별 음악 파일 경로 설정
+    const musicMap = {
+        "제빵사": "baker.mp3",
+        "엄마": "mother.mp3",
+        "쿵푸 마스터": "kungfu.mp3",
+        "과학자": "scientist.mp3",
+        "길가의 돌멩이": "rock.mp3",
+        "가수": "singer.mp3",
+        "딸": "daughter.mp3",
+        "소세지 손가락": "sausage.mp3",
+        "아무것도 아닌": "nothing.mp3"
+    };
+    
+    const videoSrc = videoMap[text];
+    const musicSrc = musicMap[text];
+
+    // --- ⬇️ 수정된 부분 1 ⬇️ ---
+    let dimensionMusic = null; // 'const' 대신 'let'으로 여기서 선언
+
+    if (!videoSrc) {
+        console.error(`"${text}"에 해당하는 동영상 파일을 찾을 수 없습니다.`);
+        showSubtitle(`"${text}" 경험을 불러올 수 없습니다.`);
+        canvas.style.display = 'block'; // 파티클 캔버스 다시 켜기
+        return; // 함수 종료
+    }
+
+    // 배경 동영상 요소 설정 및 재생
+    backgroundVideo.src = videoSrc;
+    backgroundVideo.style.display = 'block';
+    backgroundVideo.style.opacity = '1'; // CSS transition으로 부드럽게 나타남
+    backgroundVideo.currentTime = 0; // 처음부터 재생
+    backgroundVideo.play().catch(error => {
+        console.error("동영상 재생 오류:", error);
+        showSubtitle("동영상을 재생할 수 없습니다.");
+        // 오류 시 복구
+        backgroundVideo.style.display = 'none';
+        backgroundVideo.style.opacity = '0';
+        canvas.style.display = 'block';
+    });
+    
+    // 차원별 음악 재생
+    if (musicSrc) {
+        // --- ⬇️ 수정된 부분 2 ⬇️ ---
+        dimensionMusic = new Audio(musicSrc); // 선언된 변수에 할당
+        dimensionMusic.volume = 0.6; // 볼륨 조절
+        dimensionMusic.play().catch(error => {
+            console.log(`${text} 음악 재생 실패:`, error);
+        });
+    }
+    
+    // 텍스트에 따른 색깔 필터 적용 (배경 동영상에 적용)
+    const filterMap = {
+        "제빵사": "blur(2px) brightness(1.3) contrast(1.2) saturate(1.5) ",
+        "엄마": "blur(1px) brightness(1.2) contrast(1.1) saturate(1.3) ",
+        "쿵푸 마스터": "blur(3px) brightness(0.8) contrast(1.5) saturate(0.5))",
+        "과학자": "blur(1px) brightness(1.4) contrast(1.3) saturate(0.8)",
+        "길가의 돌멩이": "blur(5px) brightness(0.7) contrast(1.2) saturate(0.3) ",
+        "가수": "blur(1px) brightness(1.5) contrast(1.4) saturate(2.0)",
+        "딸": "blur(1px) brightness(1.3) contrast(1.1) saturate(1.4)",
+        "소세지 손가락": "blur(1px) brightness(1.2) contrast(1.1) saturate(1.2) hue-rotate(-10deg)",
+        "아무것도 아닌": "blur(10px) brightness(0.5) contrast(2.0) saturate(0) "
+    };
+    backgroundVideo.style.filter = filterMap[text] || "blur(2px) brightness(1.1) contrast(1.2) saturate(0.8)";
+    
+    const soundMap = {
+        "제빵사": playBakerSound,
+        "엄마": playMotherSound,
+        "쿵푸 마스터": playKungfuSound,
+        "과학자": playScientistSound,
+        "길가의 돌멩이": playRockSound,
+        "가수": playSingerSound,
+        "딸": playDaughterSound,
+        "소세지 손가락": playSausageSound,
+        "아무것도 아닌": playNothingSound
+    };
+    
+    // 해당 차원의 사운드 재생
+    if (soundMap[text]) {
+        soundMap[text]();
+    }
+    
+    // 확장된 차원 메시지 (자막)
+    const experienceMessages = {
+        "제빵사": "따뜻한 빵냄새가 가득한 빵집에서 당신은 완벽한 빵을 만들고 있습니다.",
+        "엄마": "아이들의 웃음소리가 가득한 집에서 당신은 사랑으로 가득한 엄마입니다.",
+        "쿵푸 마스터": "고요한 사원에서 당신은 평화와 힘을 찾고 있습니다.",
+        "과학자": "실험실에서 당신은 우주의 비밀을 풀어가고 있습니다.",
+        "길가의 돌멩이": "고요한 길가에서 당신은 평화로운 존재가 되었습니다.",
+        "가수": "무대 위에서 당신은 모든 이의 마음을 움직입니다.",
+        "딸": "부모님의 사랑을 받으며 자라는 소중한 존재입니다.",
+        "소세지 손가락": "손가락이 소세지처럼 부풀어 오르는 순간, 당신은 현실과 평행 세계가 뒤섞인 혼돈 속에 서 있습니다.",
+        "아무것도 아닌": "무한한 공허 속에서 당신은 존재의 의미를 찾고 있습니다."
+    };
+    const message = experienceMessages[text] || `당신은 ${text}의 경험을 하고 있습니다.`;
+    showSubtitle(message);
+    
+    // 체험 횟수 증가
+    experienceCount++;
+    console.log(`체험 완료: ${experienceCount}/3`);
+    
+    // 진행바 업데이트
+    updateProgress();
+    
+    // 5초 후 원래 상태로 복귀
+    setTimeout(() => {
+        // 배경 동영상 숨기기
+        backgroundVideo.style.opacity = '0'; // 부드럽게 사라짐
+        // opacity transition이 끝난 후 display none 처리
+        setTimeout(() => { 
+            backgroundVideo.style.display = 'none';
+            backgroundVideo.pause(); // 재생 중지
+            backgroundVideo.src = ""; // 소스 제거 (메모리 절약)
+        }, 500); // CSS transition 시간과 일치 (0.5s)
+
+        // --- ⬇️ 수정된 부분 3 (추가) ⬇️ ---
+        // 음악 정지
+        if (dimensionMusic) {
+            dimensionMusic.pause();
+            dimensionMusic.currentTime = 0; // 재생 위치를 처음으로
+        }
+        // --- ⬆️ 수정된 부분 3 (추가) ⬆️ ---
+
+        backgroundVideo.style.filter = 'none'; // 필터 리셋
+        
+        // 메인 캔버스 다시 표시
+        canvas.style.display = 'block';
+        
+        // 커서를 원래 상태로 되돌리기
+        cursorImage.style.background = 'transparent'; // 투명 배경
+        cursorImage.style.borderRadius = '0';
+        cursorImage.style.boxShadow = 'none'; // 글로우 효과 제거
+        cursorImage.style.transform = 'scale(1)';
+        cursorImage.style.animation = 'none'; // 애니메이션 제거
+        cursorImage.style.backgroundImage = "url('1.png')";
+        cursorImage.style.backgroundSize = 'contain';
+        cursorImage.style.backgroundRepeat = 'no-repeat';
+        cursorImage.style.backgroundPosition = 'center';
+        
+        // 왼쪽 바를 원래 상태로 되돌리기
+        stageText.textContent = 'CHOOSING DIMENSION';
+        
+        mouse.hoverTarget = null;
+        
+        if (experienceCount >= 3) {
+            showSubtitle("모든 차원의 경험이 모였습니다. 혼돈이 수렴합니다.");
+            setTimeout(() => {
+                advanceSection(); // 소용돌이 시작
+            }, 2000);
+        } else {
+            showSubtitle(`${3 - experienceCount}개의 다른 차원이 남아있습니다.`);
+        }
+    }, 5000); // 5초
+}
+// -------------------- 섹션 관리 --------------------
+function advanceSection() { 
+    if (section < 6) { 
+        section++; 
+        console.log("Advancing to section: ", section); 
+        handleSectionChange(); 
+        if (sectionDurations[section] !== undefined) {
+            // 섹션 3의 타이머는 startExperience에서 3번 완료 후 수동 호출하므로 제거
+            if (section !== 3) { 
+                setTimeout(advanceSection, sectionDurations[section]); 
+            }
+        } 
+    } 
+}
+function handleSectionChange(){
+    showSubtitle(sectionMessages[section]);
+    updateProgress();
+    updateStage();
+
+    if (section === 0) { 
+        particles = []; 
+        glowParticles = []; 
+        for (let i = 0; i < 200; i++) { 
+            const p = new Particle(Math.random()*width, Math.random()*height, 5 + Math.random() * 10, getRandomColor()); 
+            p.isChoiceParticle = true; 
+            particles.push(p); 
+        } 
+        for (let i = 0; i < 20; i++) {
+            glowParticles.push(new GlowParticle(Math.random()*width, Math.random()*height)); 
+        } 
+        
+        // 차원 선택 안내 메시지 표시
+        setTimeout(() => {
+            showSubtitle("허공에 떠도는 점을 클릭하여 차원을 선택하세요.");
+        }, 2000); // 2초 후에 안내 메시지 표시
+    } 
+    else if (section === 1) { 
+        const selectedParticle = particles.find(p => p.isSelected); 
+        if (selectedParticle) selectedBaseColor = selectedParticle.color; 
+    } 
+    else if (section === 2) { 
+        particles = []; 
+        shockwaves = []; 
+        glowParticles = []; 
+        for(let i=0; i<150; i++) { 
+            const shadedColor = getShadedColor(selectedBaseColor || 'rgb(200,200,200)'); 
+            particles.push(new Particle(Math.random()*width, Math.random()*height, 2 + Math.random()*3, shadedColor)); 
+        } 
+        for (let i = 0; i < 30; i++) {
+            glowParticles.push(new GlowParticle(Math.random()*width, Math.random()*height)); 
+        } 
+    } 
+     else if (section === 3) { 
+          experienceCount = 0; // 체험 횟수 초기화
+          sectionStartTime = Date.now(); // 섹션 시작 시간 기록
+          updateProgress(); // 진행바 초기화
+          
+          particles = []; // 이전 파티클 지우기
+          
+          // 텍스트 파티클 생성 (클릭 가능한 차원 체험)
+          for(let i=0; i<100; i++) {
+             particles.push(new Particle(Math.random()*width, Math.random()*height, 3+Math.random()*5, getRandomColor(), phrases[Math.floor(Math.random() * phrases.length)])); 
+         }
+         
+         // 조각난 현실 파티클 생성 (섹션 2와 유사한 효과)
+         for(let i=0; i<100; i++) { 
+             const shadedColor = getShadedColor(selectedBaseColor || 'rgb(200,200,200)'); 
+             particles.push(new Particle(Math.random()*width, Math.random()*height, 2 + Math.random()*3, shadedColor)); 
+         }
+         
+         glowParticles = []; 
+         for (let i = 0; i < 50; i++) {
+             glowParticles.push(new GlowParticle(Math.random()*width, Math.random()*height)); 
+         } 
+          // 섹션 3의 자동 전환 타이머는 제거 (startExperience에서 관리)
+     }
+    else if (section === 4) { 
+        playSwellingSound(15); 
+        convergenceStartTime = Date.now(); 
+        // 섹션 4는 자동 전환 시간 없음 (클릭 대기)
+    } 
+    else if (section === 5) { 
+        playClimaxSound(); 
+        particles = []; // 수렴 후 파티클 제거
+        embers = []; 
+        for(let i = 0; i < 200; i++) {
+            embers.push(new Ember()); 
+        }
+        glowParticles = []; 
+        for (let i = 0; i < 50; i++) {
+            glowParticles.push(new GlowParticle(centerX + (Math.random()-0.5)*100, centerY + (Math.random()-0.5)*100)); 
+        } 
+        // 섹션 5는 flash 효과 후 자동으로 섹션 6으로 전환됨 (animate 함수에서 처리)
+    } 
+    else if (section === 6) { 
+        document.body.style.background = '#000000';
+        document.getElementById('finalText').style.opacity = 1;
+        
+        // 베이글 대사 스타일 메시지 표시
+        const bagelMessage = finalBagelQuotes[Math.floor(Math.random() * finalBagelQuotes.length)];
+        showSubtitle(bagelMessage);
+        
+        // 웹캠을 배경으로 서서히 표시
+        if (webcamPermissionGranted && webcamStream) {
+            webcamVideo.style.display = 'block';
+            webcamVideo.style.zIndex = '1';
+            webcamVideo.style.filter = 'blur(2px) brightness(1.2) contrast(1.5) saturate(0) grayscale(100%)';
+            
+            // 엔딩곡 재생
+            const endingMusic = new Audio('ending.mp3');
+            endingMusic.volume = 0.7; // 볼륨 조절
+            endingMusic.play().catch(error => {
+                console.log('엔딩곡 재생 실패:', error);
+            });
+            
+            // 서서히 나타나도록 opacity를 지연시켜 변경
+            setTimeout(() => {
+                webcamVideo.style.opacity = '1';
+                
+                // 자막이 사라진 후 촬영 버튼 표시
+                setTimeout(() => {
+                    document.getElementById('cameraButton').style.display = 'block';
+                }, 8000); // 자막이 8초 후에 사라지므로 그 후에 버튼 표시
+            }, 500); // 0.5초 후에 서서히 나타남
+        }
+        
+        canvas.style.display = 'none'; // 파티클 캔버스 숨김
+        backgroundVideo.style.display = 'none'; // 배경 비디오 숨김
+    }
+}
+
+// --- 최종 붕괴 함수 ---
+async function initiateFinalCollapse() {
+    isAwaitingFinalClick = false; 
+    isCollapsing = true; 
+    playFinalCollapseSound();
+    
+    document.body.style.background = 'transparent';
+    
+    const collapseInterval = setInterval(() => {
+        let allGone = true;
+        particles.forEach(p => {
+            p.dx += (centerX - p.x) * 0.05; p.dy += (centerY - p.y) * 0.05;
+            p.x += p.dx; p.y += p.dy; p.r -= 0.2;
+            if (p.r > 0.1) allGone = false; // 파티클이 완전히 사라졌는지 확인
+            else p.r = 0; // 0 미만 방지
+        });
+        if (allGone) { 
+            clearInterval(collapseInterval); 
+            console.log("Collapse finished, advancing to section 5");
+            advanceSection(); 
+        }
+    }, 16); // 약 60fps
+}
+
+
+// -------------------- 메인 애니메이션 루프 (파티클) --------------------
+function animate(){
+    ctx.save();
+    if(screenShake.intensity > 0) { ctx.translate((Math.random() - 0.5) * screenShake.intensity, (Math.random() - 0.5) * screenShake.intensity); screenShake.intensity *= 0.9; }
+
+    if (isCollapsing) {
+        // 붕괴 중일 때는 캔버스를 투명하게 지움
+        ctx.clearRect(-width, -height, width * 2, height * 2);
+    } else {
+        // 평소에는 잔상 효과를 위해 반투명 흰색으로 덮음
+        const clearAlpha = section === 4 ? 0.1 : 0.25;
+        ctx.fillStyle = `rgba(255, 255, 255, ${clearAlpha})`;
+        ctx.fillRect(-width, -height, width * 2, height * 2);
+    }
+    
+    if (mouse.down && section === 3) {
+        if(Math.random() < 0.3) screenShake.intensity = 15;
+        if(Math.random() < 0.01 && glitchEffect.duration <= 0) { 
+            glitchEffect.type = 'gravity'; 
+            glitchEffect.duration = 120; 
+        } 
+    }
+    if(glitchEffect.duration > 0) glitchEffect.duration--; else glitchEffect.type = 'none';
+
+    mouse.hoverTarget = null;
+    if (section === 0) { 
+        for (let i = particles.length - 1; i >= 0; i--) { 
+            const p = particles[i]; 
+            const dist = Math.sqrt((p.x - mouse.x)**2 + (p.y - mouse.y)**2); 
+            if(dist < p.r && !p.isShattered) { 
+                mouse.hoverTarget = p; 
+                break; 
+            } 
+        } 
+    } else if (section === 3) {
+        // 섹션 3: 텍스트 파티클 선택 로직
+        for (let i = particles.length - 1; i >= 0; i--) { 
+            const p = particles[i]; 
+            if (p.text) { // 텍스트가 있는 파티클만
+                const dist = Math.sqrt((p.x - mouse.x)**2 + (p.y - mouse.y)**2); 
+                if(dist < p.r * 4) { // 클릭 영역을 더 크게 확장
+                    mouse.hoverTarget = p; 
+                    break; 
+                } 
+            }
+        }
+    }
+
+    // --- 각 섹션별 그리기 로직 ---
+    if (section < 5) { // 섹션 0 ~ 4
+        particles.forEach(p => { p.update(); p.draw(ctx); });
+        glowParticles.forEach(gp => { gp.update(); gp.draw(ctx); });
+        
+        // 사라진 파티클 제거
+        particles = particles.filter(p => !((p.isShattered && p.alpha <= 0) || (section === 1 && !p.isSelected && p.alpha <= 0) || p.r <= 0.1));
+        glowParticles = glowParticles.filter(gp => gp.life > 0);
+        
+        // 섹션 4 클릭 대기 처리
+        if (section === 4 && !isAwaitingFinalClick) {
+             if(Date.now() - convergenceStartTime > 15000) { // 17초 후 클릭 요청
+                 isAwaitingFinalClick = true; 
+                 showSubtitle("이제 클릭하여 모든 것을 하나로 통합하세요!"); 
+             } 
+        }
+    } else if (section === 5) { // 섹션 5: Climax (Flash)
+        if(flashRadius < Math.max(width, height)) { // 화면 전체를 덮도록 수정
+             flashRadius += Math.max(width, height) * 0.03; 
+        } else { 
+             flashAlpha -= 0.02; 
+        }
+        let grad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, flashRadius);
+        grad.addColorStop(0, `rgba(255,255,255,${flashAlpha})`); 
+        grad.addColorStop(0.4, `rgba(255, 255, 0, ${flashAlpha*0.7})`); 
+        grad.addColorStop(0.7, `rgba(255, 0, 255, ${flashAlpha*0.7})`); 
+        grad.addColorStop(1, `rgba(0,0,0,0)`);
+        ctx.fillStyle = grad; 
+        ctx.fillRect(-width, -height, width*2, height*2); // 화면 전체를 채움
+        
+        glowParticles.forEach(gp => { gp.update(); gp.draw(ctx); });
+        glowParticles = glowParticles.filter(gp => gp.life > 0);
+        
+        // 플래시 효과 끝나면 다음 섹션으로
+        if(flashAlpha <= 0) {
+             console.log("Flash finished, advancing to section 6");
+             advanceSection();
+        }
+    } else if (section === 6) { // 섹션 6: Finale
+        embers.forEach(e => { e.update(); e.draw(ctx); }); 
+        embers = embers.filter(e => e.life > 0);
+        glowParticles.forEach(gp => { gp.update(); gp.draw(ctx); }); 
+        glowParticles = glowParticles.filter(gp => gp.life > 0);
+        // 섹션 6에서는 파티클/엠버가 서서히 사라짐
+    }
+    
+    // 충격파는 항상 그림
+    shockwaves.forEach(sw => { sw.update(); sw.draw(ctx); }); 
+    shockwaves = shockwaves.filter(sw => sw.life > 0);
+    
+    ctx.restore();
+    requestAnimationFrame(animate); // 다음 프레임 요청
+}
+
+// -------------------- 사운드 엔진 --------------------
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+let glitchNode = null; 
+function playTone(frequency, duration, volume = 0.2){ const oscillator = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime); gainNode.gain.setValueAtTime(volume, audioCtx.currentTime); oscillator.connect(gainNode); gainNode.connect(audioCtx.destination); oscillator.start(); oscillator.stop(audioCtx.currentTime + duration); }
+function playGlitchSound() { if (Math.random() < 0.1) { playWhiteNoiseBurst(); return; } if (glitchNode) return; const duration = 0.05 + Math.random() * 0.2; glitchNode = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); glitchNode.type = ['sawtooth', 'square', 'triangle'][Math.floor(Math.random()*3)]; glitchNode.frequency.setValueAtTime(60 + Math.random() * 200, audioCtx.currentTime); glitchNode.detune.setValueAtTime(Math.random() * 100, audioCtx.currentTime); gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime); gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + duration); glitchNode.connect(gainNode); gainNode.connect(audioCtx.destination); glitchNode.start(); glitchNode.stop(audioCtx.currentTime + duration); glitchNode.onended = () => { glitchNode = null; if(mouse.down && section === 3) playGlitchSound(); } } 
+function stopGlitchSound(){ if(glitchNode) glitchNode.onended = null; }
+function playSwellingSound(duration) { const bassOsc = audioCtx.createOscillator(); const bassGain = audioCtx.createGain(); bassOsc.type = 'sine'; bassOsc.frequency.setValueAtTime(60, audioCtx.currentTime); bassOsc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + duration); bassGain.gain.setValueAtTime(0.01, audioCtx.currentTime); bassGain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + duration * 0.8); bassGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + duration); bassOsc.connect(bassGain); bassGain.connect(audioCtx.destination); bassOsc.start(); bassOsc.stop(audioCtx.currentTime + duration); const harmonicOsc = audioCtx.createOscillator(); const harmonicGain = audioCtx.createGain(); harmonicOsc.type = 'sine'; harmonicOsc.frequency.setValueAtTime(200, audioCtx.currentTime); harmonicOsc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + duration); harmonicGain.gain.setValueAtTime(0.01, audioCtx.currentTime); harmonicGain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + duration * 0.8); harmonicGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + duration); harmonicOsc.connect(harmonicGain); harmonicGain.connect(audioCtx.destination); harmonicOsc.start(); harmonicOsc.stop(audioCtx.currentTime + duration); }
+function playClimaxSound() { const rumble = audioCtx.createOscillator(); const rumbleGain = audioCtx.createGain(); rumble.type = 'sine'; rumble.frequency.setValueAtTime(40, audioCtx.currentTime); rumbleGain.gain.setValueAtTime(0.8, audioCtx.currentTime); rumbleGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.5); rumble.connect(rumbleGain); rumbleGain.connect(audioCtx.destination); rumble.start(); rumble.stop(audioCtx.currentTime + 2.5); const shimmer = audioCtx.createOscillator(); const shimmerGain = audioCtx.createGain(); shimmer.type = 'sine'; shimmer.frequency.setValueAtTime(1200, audioCtx.currentTime); shimmerGain.gain.setValueAtTime(0, audioCtx.currentTime); shimmerGain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 1.5); shimmerGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2.5); shimmer.connect(shimmerGain); shimmerGain.connect(audioCtx.destination); shimmer.start(); shimmer.stop(audioCtx.currentTime + 2.5); const harmonic = audioCtx.createOscillator(); const harmonicGain = audioCtx.createGain(); harmonic.type = 'triangle'; harmonic.frequency.setValueAtTime(600, audioCtx.currentTime); harmonicGain.gain.setValueAtTime(0, audioCtx.currentTime); harmonicGain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 1.0); harmonicGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2.5); harmonic.connect(harmonicGain); harmonicGain.connect(audioCtx.destination); harmonic.start(); harmonic.stop(audioCtx.currentTime + 2.5); }
+function playChimeSound() { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime); gain.gain.setValueAtTime(0.4, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.0); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 1.0); }
+function playFallingSound() { const sounds = [ () => { const osc1 = audioCtx.createOscillator(); const gain1 = audioCtx.createGain(); osc1.type = 'sine'; osc1.frequency.setValueAtTime(400, audioCtx.currentTime); osc1.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.8); gain1.gain.setValueAtTime(0.3, audioCtx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8); osc1.connect(gain1); gain1.connect(audioCtx.destination); osc1.start(); osc1.stop(audioCtx.currentTime + 0.8); }, () => { const osc2 = audioCtx.createOscillator(); const gain2 = audioCtx.createGain(); osc2.type = 'triangle'; osc2.frequency.setValueAtTime(600, audioCtx.currentTime); osc2.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 1.2); gain2.gain.setValueAtTime(0.2, audioCtx.currentTime); gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.2); osc2.connect(gain2); gain2.connect(audioCtx.destination); osc2.start(); osc2.stop(audioCtx.currentTime + 1.2); }, () => { const osc3 = audioCtx.createOscillator(); const gain3 = audioCtx.createGain(); osc3.type = 'sawtooth'; osc3.frequency.setValueAtTime(800, audioCtx.currentTime); osc3.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 1.0); gain3.gain.setValueAtTime(0.25, audioCtx.currentTime); gain3.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.0); osc3.connect(gain3); gain3.connect(audioCtx.destination); osc3.start(); osc3.stop(audioCtx.currentTime + 1.0); } ]; const randomSound = sounds[Math.floor(Math.random() * sounds.length)]; randomSound(); }
+function playFinalCollapseSound() { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sawtooth'; osc.frequency.setValueAtTime(500, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.5); gain.gain.setValueAtTime(0.4, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
+function playWhiteNoiseBurst() { const bufferSize = audioCtx.sampleRate * 0.2; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); let data = buffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; } const noiseNode = audioCtx.createBufferSource(); noiseNode.buffer = buffer; const gainNode = audioCtx.createGain(); gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15); noiseNode.connect(gainNode); gainNode.connect(audioCtx.destination); noiseNode.start(); }
+
+// 차원별 사운드 효과 함수들
+function playBakerSound() {
+    // 따뜻한 빵집 소리 - 낮은 톤의 따뜻한 사운드
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+    osc1.frequency.exponentialRampToValueAtTime(330, audioCtx.currentTime + 2);
+    gain1.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2);
+    osc1.connect(gain1);
+    gain1.connect(audioCtx.destination);
+    osc1.start();
+    osc1.stop(audioCtx.currentTime + 2);
+}
+
+function playMotherSound() {
+    // 따뜻한 가정 소리 - 부드러운 하모니
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    const gain2 = audioCtx.createGain();
+    
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(261.63, audioCtx.currentTime); // C4
+    gain1.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.5);
+    
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(329.63, audioCtx.currentTime); // E4
+    gain2.gain.setValueAtTime(0.06, audioCtx.currentTime);
+    gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.5);
+    
+    osc1.connect(gain1);
+    osc2.connect(gain2);
+    gain1.connect(audioCtx.destination);
+    gain2.connect(audioCtx.destination);
+    
+    osc1.start();
+    osc2.start();
+    osc1.stop(audioCtx.currentTime + 2.5);
+    osc2.stop(audioCtx.currentTime + 2.5);
+}
+
+function playKungfuSound() {
+    // 고요한 사원 소리 - 깊고 평화로운 톤
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(146.83, audioCtx.currentTime); // D3
+    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 3);
+    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 3);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 3);
+}
+
+function playScientistSound() {
+    // 차가운 실험실 소리 - 전자음 같은 효과
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    const gain2 = audioCtx.createGain();
+    
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(800, audioCtx.currentTime);
+    osc1.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 1.5);
+    gain1.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+    
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(400, audioCtx.currentTime);
+    osc2.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 1.5);
+    gain2.gain.setValueAtTime(0.04, audioCtx.currentTime);
+    gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+    
+    osc1.connect(gain1);
+    osc2.connect(gain2);
+    gain1.connect(audioCtx.destination);
+    gain2.connect(audioCtx.destination);
+    
+    osc1.start();
+    osc2.start();
+    osc1.stop(audioCtx.currentTime + 1.5);
+    osc2.stop(audioCtx.currentTime + 1.5);
+}
+
+function playRockSound() {
+    // 고요한 자연 소리 - 매우 낮은 톤
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(82.41, audioCtx.currentTime); // E2
+    osc.frequency.exponentialRampToValueAtTime(55, audioCtx.currentTime + 4);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 4);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 4);
+}
+
+function playSingerSound() {
+    // 화려한 무대 소리 - 높은 톤의 멜로디
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    const gain2 = audioCtx.createGain();
+    
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+    osc1.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 1);
+    gain1.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+    
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(783.99, audioCtx.currentTime); // G5
+    osc2.frequency.exponentialRampToValueAtTime(1046.5, audioCtx.currentTime + 1);
+    gain2.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+    
+    osc1.connect(gain1);
+    osc2.connect(gain2);
+    gain1.connect(audioCtx.destination);
+    gain2.connect(audioCtx.destination);
+    
+    osc1.start();
+    osc2.start();
+    osc1.stop(audioCtx.currentTime + 1);
+    osc2.stop(audioCtx.currentTime + 1);
+}
+
+function playDaughterSound() {
+    // 밝고 순수한 소리 - 높은 톤의 순수한 사운드
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
+    osc.frequency.exponentialRampToValueAtTime(554.37, audioCtx.currentTime + 1.5);
+    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 1.5);
+}
+
+function playSausageSound() {
+    // 혼돈스러운 소리 - 불규칙한 톤 변화
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    const gain2 = audioCtx.createGain();
+    
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(200, audioCtx.currentTime);
+    osc1.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.5);
+    osc1.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 1);
+    gain1.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+    
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(300, audioCtx.currentTime);
+    osc2.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.3);
+    osc2.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 1);
+    gain2.gain.setValueAtTime(0.06, audioCtx.currentTime);
+    gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+    
+    osc1.connect(gain1);
+    osc2.connect(gain2);
+    gain1.connect(audioCtx.destination);
+    gain2.connect(audioCtx.destination);
+    
+    osc1.start();
+    osc2.start();
+    osc1.stop(audioCtx.currentTime + 1);
+    osc2.stop(audioCtx.currentTime + 1);
+}
+
+function playNothingSound() {
+    // 공허한 소리 - 매우 낮고 긴 톤
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(55, audioCtx.currentTime); // A1
+    osc.frequency.exponentialRampToValueAtTime(27.5, audioCtx.currentTime + 5);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 5);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 5);
+}
+
+
+// 백그라운드 리소스 로드 함수 (별다른 로딩 없음)
+async function loadResourcesInBackground() {
+    console.log("백그라운드에서 리소스 로드 시작...");
+    // 웹캠 시작 등 필요한 비동기 작업 가능 (지금은 없음)
+    console.log("백그라운드 준비 완료");
+    return true; 
+}
+
+
+// 초기화 함수
+async function init() {
+    // 웹캠 권한 먼저 요청
+    console.log("웹캠 권한 요청 중...");
+    const webcamSuccess = await startWebcam();
+    if (webcamSuccess) {
+        console.log("웹캠 권한 획득 완료");
+    } else {
+        console.log("웹캠 권한 거부됨 - 마지막 엔딩에서 웹캠 사용 불가");
+    }
+    
+    // 비주얼/애니메이션 먼저 시작
+    handleSectionChange();
+    animate();
+    
+    // 백그라운드 리소스 로드 시작 (await 제거)
+    loadResourcesInBackground(); 
+}
+
+
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>
